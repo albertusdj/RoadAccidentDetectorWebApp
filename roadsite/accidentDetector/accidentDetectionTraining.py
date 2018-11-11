@@ -11,8 +11,8 @@ from sklearn.pipeline import Pipeline
 from preprocessor import Preprocessor
 
 def readCSV(file):
-    csv = pd.read_csv(file, sep=",", header=None)
-    data = pd.DataFrame({'tweets':csv[2], 'isRoadIncident':csv[0]})[['tweets', 'isRoadIncident']]
+    csv = pd.read_csv(file, sep="\t")
+    data = pd.DataFrame({'tweets':csv['tweets'], 'isRoadIncident':csv['isRoadIncident']})[['tweets', 'isRoadIncident']]
     return data
 
 def saveModel(model, file):
@@ -25,6 +25,8 @@ def loadModel(file):
 
 
 if __name__ == '__main__':
+    preprocessor = Preprocessor()
+    
     trainingFile = 'tweets/training-dataset.csv'
     trainingData = readCSV(trainingFile)
 
