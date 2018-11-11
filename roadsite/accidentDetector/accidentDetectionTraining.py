@@ -40,4 +40,4 @@ if __name__ == '__main__':
     accuracy = accuracy_score(y_test, y_pred)
     print('Accuracy = ', accuracy*100, '%')
 
-    save_model(pipeline, 'multinomialNB.pkl')
+    saveModel(pipeline, 'multinomialNB.pkl')
