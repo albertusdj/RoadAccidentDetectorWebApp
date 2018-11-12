@@ -32,9 +32,9 @@ def loadModel(file):
     data = pkl.load(input)
     return data
 
-def extractFeatureFromWords(sent, i):
-    word = sent[i][0]
-    postag = sent[i][1]
+def extractFeatureFromWords(sentence, idx):
+    word = sentence[idx][0]
+    postag = sentence[idx][1]
 
     features = {
         'bias': 1.0,
@@ -47,9 +47,9 @@ def extractFeatureFromWords(sent, i):
         'postag': postag,
         'postag[:2]': postag[:2],
     }
-    if i > 0:
-        word1 = sent[i-1][0]
-        postag1 = sent[i-1][1]
+    if idx > 0:
+        word1 = sentence[idx-1][0]
+        postag1 = sentence[idx-1][1]
         features.update({
             '-1:lower': word1.lower(),
             '-1:isTitle': word1.istitle(),
@@ -60,9 +60,9 @@ def extractFeatureFromWords(sent, i):
     else:
         features['BOS'] = True
 
-    if i < len(sent)-1:
-        word1 = sent[i+1][0]
-        postag1 = sent[i+1][1]
+    if idx < len(sentence)-1:
+        word1 = sentence[idx+1][0]
+        postag1 = sentence[idx+1][1]
         features.update({
             '+1:lower': word1.lower(),
             '+1:isTitle': word1.istitle(),
@@ -86,8 +86,8 @@ def tokenize(sent):
 
 def featureExtraction(data):
     # Even data splitting
-    train_sentences = data[:10000]
-    test_sentences = data[10000:20000]
+    train_sentences = data[:43164]
+    test_sentences = data[43164:47959]
 
     X_train = [extractFeatureFromSentence(sentence) for sentence in train_sentences]
     y_train = [labelsExtraction(sentence) for sentence in train_sentences]
