@@ -1,6 +1,6 @@
-
 import nltk
 import pandas as pd
+import pickle as pkl
 import sklearn
 import scipy.stats
 import sklearn_crfsuite
@@ -17,13 +17,23 @@ def readCSV(file):
     csv = pd.read_csv(file, encoding = "ISO-8859-1")
     return csv
 
+def readTweetForTesting(file):
+    csv = pd.read_csv(file, sep="\t")
+    data = pd.DataFrame({'tweets':csv['tweets'], 'isRoadIncident':csv['isRoadIncident']})[['tweets', 'isRoadIncident']]
+    return data
+
+def loadModel(file):
+    input = open('models/%s' % file, 'rb')
+    data = pkl.load(input)
+    return data
+
 def extractFeatureFromWords(sent, i):
     word = sent[i][0]
     postag = sent[i][1]
 
     features = {
         'bias': 1.0,
-        'word.lower()': word.lower(),
+        'lower': word.lower(),
         'word[-3:]': word[-3:],
         'word[-2:]': word[-2:],
         'isSupper': word.isupper(),
@@ -83,6 +93,53 @@ def featureExtraction(data):
 
     return (X_train, y_train, X_test, y_test)
 
+def postag(tweet):
+    sent_text = nltk.sent_tokenize(tweet)
+    sent = list()
+    for sentence in sent_text:
+        tokenized_text = nltk.word_tokenize(sentence)
+        tagged = nltk.pos_tag(tokenized_text)
+        sent.append(tagged)
+    return sent
+
+def locationExtraction(tagged, y):
+    locations = []
+    for i in range (0, len(y)):
+        loc = ''
+        for j in range(0, len(y[i])):
+            if y[i][j] == 'B-geo':
+                if len(loc) == 0:
+                    loc += tagged[i][j][0]
+                else:
+                    locations.append(loc)
+                    loc = tagged[i][j][0]
+            if y[i][j] == 'I-geo':
+                loc += ' ' + tagged[i][j][0]
+        if len(loc) > 0:
+            locations.append(loc)
+    return locations
+
+def predictLocation(tweets):
+    y_pred = pipeline.predict(tweets)
+    
+    locations = []
+    for i in range(0, len(tweets)):
+        if y_pred[i] == 1:
+            tagged = postag(tweets[i])
+            x = [extractFeatureFromSentences(s) for s in tagged]
+            y = crf.predict(x)
+            y_loc = locationExtraction(tagged,y)
+            if len(y_loc) > 0:
+                locations.append(y_loc) 
+            else:
+                locations.append('-')
+        else:
+            locations.append('-')
+            
+    df = pd.DataFrame({'tweets':tweets, 'isRoadIncident':y_pred, 'location':locations})[['tweets', 'isRoadIncident', 'location']]
+    
+    return df
+
 if __name__ == '__main__':
     preprocessor = Preprocessor()
 
@@ -115,7 +172,12 @@ if __name__ == '__main__':
                           average='weighted', 
                           labels=['B-geo', 'I-geo']))
     
-
+    tweetsFile = 'datasets/tweet-dataset.csv'
+    tweetsTestData = readTweetForTesting(tweetsFile)['tweets'].head(50)
+    pipelineModelFile = 'multinomialNB.pkl'
+    pipeline = loadModel(pipelineModelFile)
+    result = predictLocation(tweetsTestData)
+    print(result)
 
 
 
