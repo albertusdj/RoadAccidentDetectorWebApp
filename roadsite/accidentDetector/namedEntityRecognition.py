@@ -144,7 +144,7 @@ def predictLocation(tweets):
     
     return df
 
-class locationPredictor():
+class LocationPredictor():
     crf = None
 
     def __init__(self, file):
