@@ -27,7 +27,7 @@ def loadModel(file):
 if __name__ == '__main__':
     preprocessor = Preprocessor()
     
-    trainingFile = 'tweets/training-dataset.csv'
+    trainingFile = 'datasets/tweet-dataset.csv'
     trainingData = readCSV(trainingFile)
 
     X_train, X_test, y_train, y_test = train_test_split(trainingData['tweets'], trainingData['isRoadIncident'])

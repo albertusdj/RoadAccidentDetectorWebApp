@@ -41,3 +41,15 @@ class Preprocessor():
 
         # Add to list
         return tokenized_tweet
+    
+    @staticmethod
+    def processSentences(sentences):
+        processedSentences = list()
+        i = -1
+        for word in sentences:
+            if type(word[0]) is str:
+                processedSentences.append(list())
+                i += 1
+            corpus = word[1], word[2], word[3]
+            processedSentences[i].append(tuple(corpus))
+        return processedSentences
